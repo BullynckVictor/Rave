@@ -19,6 +19,9 @@
 #	define RV_PLATFORM_ANDROID
 #endif
 
+#ifdef RV_RENDERER_D3D11
+#endif
+
 #ifdef RV_TARGET_32
 #	define RV_TARGET_x32
 #	define RV_TARGET_X32

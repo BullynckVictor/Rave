@@ -41,6 +41,12 @@ void rv::assert_func(bool cond, const char* expression, const char* file, u64 li
 	}
 }
 
+rv::UnknownError::UnknownError()
+	:
+	ErrorInfo(identifier)
+{
+}
+
 std::string rv::UnknownError::description() const
 {
 	return "An unknown error occurred";

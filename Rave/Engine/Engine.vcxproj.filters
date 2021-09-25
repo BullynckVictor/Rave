@@ -60,6 +60,12 @@
     <ClInclude Include="Core\SystemInclude.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Utility\source\Result.cpp">

@@ -48,13 +48,13 @@ void rv::ResultException::format(const ResultInfo& info, const std::string& mess
 		   << "Line: " << line << '\n' << '\n';
 
 	std::string opt_info = info.optional_info();
-	if (!opt_info.empty())
+	if (opt_info.size() != 0)
 		ss << opt_info << '\n' << std::endl;
 
-	if (!message.empty())
-		ss << "Message: " << message << '\n' << std::endl;
+	ss << "Description: " << info.description();
 
-	ss << "Description: ", info.description();
+	if (message.size() != 0)
+		ss << '\n' << std::endl << "Message: " << message;
 
 	m_what = ss.str();
 }

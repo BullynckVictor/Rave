@@ -38,6 +38,7 @@ namespace rv
 	{
 		static constexpr Identifier identifier = unknown_error;
 
+		UnknownError();
 		std::string description() const override;
 	};
 
@@ -52,3 +53,5 @@ namespace rv
 #define rv_assert(cond)
 #define rv_assert_msg(cond, msg)
 #endif
+
+#define rv_failed rv::UnknownError()
