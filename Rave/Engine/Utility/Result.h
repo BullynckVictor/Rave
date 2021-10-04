@@ -2,64 +2,74 @@
 #include <memory>
 #include "Engine/Utility/Severity.h"
 #include "Engine/Utility/Identifier.h"
+#include "Engine/Utility/Flags.h"
 
 namespace rv
 {
 	struct ResultInfo
 	{
-		ResultInfo();
-		ResultInfo(const Identifier& type, const Severity& severity);
-		virtual ~ResultInfo() = default;
+		virtual ~ResultInfo() {}
 
 		virtual std::string description() const = 0;
 		virtual std::string optional_info() const;
-
-		Severity severity;
-		Identifier type;
 	};
 
-	struct ResultBase
+	struct Result
 	{
 	public:
-		ResultBase() = default;
-		template<typename R> ResultBase(const R& result) : pInfo(new R(result)) { static_assert(std::is_base_of_v<ResultInfo, R>, "rv::ResultBase(const R& result) argument should be derived from rv::ResultInfo"); }
-		template<typename R> ResultBase(R&& result) : pInfo(new R(std::move(result))) { static_assert(std::is_base_of_v<ResultInfo, R>, "rv::ResultBase(R&& result) argument should be derived from rv::ResultInfo"); }
+		Result() = default;
+		Result(const Severity& severity, const Identifier& type, ResultInfo* info = nullptr);
 
-		bool succeeded(const Severity& severity = RV_SEVERITY_INFO) const;
-		bool failed(const Severity& severity = RV_SEVERITY_INFO) const;
+		const Identifier& type() const;
+		const Severity& severity() const;
+		const ResultInfo* info() const;
+
 		bool has_info() const;
-
-		void expect(const char* errormessage) const;
-		void expect(const Severity& severity = RV_SEVERITY_INFO, const char* errormessage = nullptr) const;
-
-		const ResultInfo& info() const;
-		const ResultInfo& info_unchecked() const;
+		const ResultInfo& get_info() const;
 		template<typename R>
-		const R& info_as() const { static_assert(std::is_base_of_v<ResultInfo, R>); return dynamic_cast<const R&>(info()); }
+		const R& get_info_as() const { return dynamic_cast<const R&>(get_info()); }
+
+		bool succeeded(const Flags<Severity>& severity = RV_SEVERITY_INFO) const;
+		bool failed(const Flags<Severity>& severity = RV_SEVERITY_INFO) const;
+
+		void expect(const Flags<Severity>& severity = RV_SEVERITY_INFO) const;
+		void expect(const std::string& message, const Flags<Severity>& severity = RV_SEVERITY_INFO) const;
+
+		void throw_exception(const std::string& message = {}) const;
 
 	private:
-		std::shared_ptr<ResultInfo> pInfo;
+		Identifier m_type;
+		Severity m_severity;
+		std::shared_ptr<ResultInfo> m_info;
 	};
+
+	static constexpr Identifier success_id = "Success";
+	extern Result success;
 
 	template<typename T>
-	struct Result : public ResultBase
+	struct ResultValue : public Result
 	{
-		Result() : value() {};
-		template<typename R> Result(const R& result) : ResultBase(result) {}
-		template<typename R> Result(R&& result) : ResultBase(std::move(result)) {}
-		Result(const T& value) : value(value) {}
-		Result(T&& value) : value(std::move(value)) {}
+	public:
+		ResultValue(const T& v = {}) : Result(success), m_value(v) {}
+		ResultValue(T&& v) : Result(success), m_value(std::move(v)) {}
+		ResultValue(const Result& result) : Result(result) {}
 
-		T value;
-	};
+		T& value() { return m_value; }
+		T& get(const Flags<Severity>& sev = RV_SEVERITY_INFO) { expect(sev); return value(); }
+		T& get(const std::string& message, const Flags<Severity>& sev = RV_SEVERITY_INFO) { expect(message, sev); return value(); }
 
-	template<>
-	struct Result<void> : public ResultBase
-	{
-		Result() {};
-		template<typename R> Result(const R& result) : ResultBase(result) {}
-		template<typename R> Result(R&& result) : ResultBase(std::move(result)) {}
+		const T& value() const { return m_value; }
+		const T& get(const Flags<Severity>& sev = RV_SEVERITY_INFO) const { expect(sev); return value(); }
+		const T& get(const std::string& message, const Flags<Severity>& sev = RV_SEVERITY_INFO) const { expect(message, sev); return value(); }
+
+	private:
+		T m_value;
 	};
 }
 
-#define rv_success {}
+#define rv_return_failed(r)	if ((result = (r)).failed()) return result
+// returns result if failed
+#define rvrf(r)				rv_return_failed(r)
+#define rv_result			rv::Result result = rv::success
+// creates a Result value called 'result'
+#define rvr					rv_result

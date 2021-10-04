@@ -8,15 +8,31 @@
 
 #ifdef _WIN32
 #	define RV_PLATFORM_WINDOWS
+#	define rv_only_windows(code)	code
+#	define rv_only_apple(code)		
+#	define rv_only_linux(code)		
+#	define rv_only_android(code)	
 #endif
 #ifdef __APPLE__
 #	define RV_PLATFORM_APPLE
+#	define rv_only_windows(code)	
+#	define rv_only_apple(code)		code
+#	define rv_only_linux(code)		
+#	define rv_only_android(code)	
 #endif
 #ifdef __linux__
 #	define RV_PLATFORM_LINUX
+#	define rv_only_windows(code)	
+#	define rv_only_apple(code)		
+#	define rv_only_linux(code)		code
+#	define rv_only_android(code)	
 #endif
 #ifdef __ANDROID__
 #	define RV_PLATFORM_ANDROID
+#	define rv_only_windows(code)	
+#	define rv_only_apple(code)		
+#	define rv_only_linux(code)		
+#	define rv_only_android(code)	code
 #endif
 
 #ifdef RV_RENDERER_D3D11

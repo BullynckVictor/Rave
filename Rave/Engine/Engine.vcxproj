@@ -180,7 +180,9 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Utility\Error.h" />
     <ClInclude Include="Utility\Exception.h" />
+    <ClInclude Include="Utility\Flags.h" />
     <ClInclude Include="Utility\Hash.h" />
+    <ClInclude Include="Utility\hresults.h" />
     <ClInclude Include="Utility\Identifier.h" />
     <ClInclude Include="Utility\Include.h" />
     <ClInclude Include="Utility\Result.h" />
@@ -192,8 +194,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\source\Main.cpp" />
+    <ClCompile Include="Core\source\Window.cpp" />
     <ClCompile Include="Utility\source\Error.cpp" />
     <ClCompile Include="Utility\source\Exception.cpp" />
+    <ClCompile Include="Utility\source\hresults.cpp" />
     <ClCompile Include="Utility\source\Result.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

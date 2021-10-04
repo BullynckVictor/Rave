@@ -2,64 +2,74 @@
 #include "Engine/Utility/Exception.h"
 #include "Engine/Utility/Error.h"
 
-rv::ResultInfo::ResultInfo()
-	:
-	severity(RV_SEVERITY_NULL),
-	type()
+namespace rv
 {
-}
+	Result success = Result(RV_SEVERITY_INFO, success_id);
 
-rv::ResultInfo::ResultInfo(const Identifier& type, const Severity& severity)
-	:
-	severity(severity),
-	type(type)
-{
-}
+	std::string ResultInfo::optional_info() const
+	{
+		return std::string();
+	}
 
-std::string rv::ResultInfo::optional_info() const
-{
-	return {};
-}
+	Result::Result(const Severity& sev, const Identifier& id, ResultInfo* pinfo)
+		:
+		m_severity(sev),
+		m_type(id),
+		m_info(pinfo)
+	{
+	}
+	
+	const Identifier& Result::type() const
+	{
+		return m_type;
+	}
+	
+	const Severity& Result::severity() const
+	{
+		return m_severity;
+	}
+	
+	const ResultInfo* Result::info() const
+	{
+		return m_info.get();
+	}
+	
+	bool Result::has_info() const
+	{
+		return info();
+	}
+	
+	const ResultInfo& Result::get_info() const
+	{
+		if (has_info())
+			return *info();
+		throw std::runtime_error("deref null **temp** (result.cpp)");
+	}
+	
+	bool Result::succeeded(const Flags<Severity>& sev) const
+	{
+		return sev.contains(severity());
+	}
+	
+	bool Result::failed(const Flags<Severity>& sev) const
+	{
+		return !succeeded(sev);
+	}
 
-bool rv::ResultBase::succeeded(const Severity& severity) const
-{
-	if (has_info())
-		return true;
-
-	return info().severity <= severity;
-}
-
-bool rv::ResultBase::failed(const Severity& severity) const
-{
-	if (has_info())
-		return info_unchecked().severity > severity;
-
-	return false;
-}
-
-bool rv::ResultBase::has_info() const
-{
-	return pInfo.get();
-}
-
-void rv::ResultBase::expect(const char* errormessage) const
-{
-	expect(RV_SEVERITY_INFO, errormessage);
-}
-
-void rv::ResultBase::expect(const Severity& severity, const char* errormessage) const
-{
-	if (failed(severity))
-		throw ResultException(pInfo, RV_FILE_LINE, errormessage);
-}
-
-const rv::ResultInfo& rv::ResultBase::info() const
-{
-	rv_assert_msg(pInfo.get(), "Cannot pass a reference to an ampty ResultInfo member, call has_info() to check");
-	return *pInfo;
-}
-
-const rv::ResultInfo& rv::ResultBase::info_unchecked() const
-{
-	return *pInfo;
+	void Result::expect(const Flags<Severity>& sev) const
+	{
+		if (failed(sev))
+			throw_exception();
+	}
+	
+	void Result::expect(const std::string& message, const Flags<Severity>& sev) const
+	{
+		if (failed(sev))
+			throw_exception(message);
+	}
+	
+	void Result::throw_exception(const std::string& message) const
+	{
+		throw ResultException(*this, message);
+	}
 }

@@ -69,10 +69,14 @@ namespace rv
 		VectorWrapper(const T& width, const T& height) : width(width), height(height) {}
 		VectorWrapper(T&& width, T&& height) : width(std::move(width)), height(std::move(height)) {}
 
-		template<size_t Index> constexpr		T& get_element() { return array[Index]; }
-		template<size_t Index> constexpr const	T& get_element() const { return array[Index]; }
+		template<size_t Index>	constexpr		T& get_element();
+		template<>				constexpr		T& get_element<0>()			{ return width; }
+		template<>				constexpr		T& get_element<1>()			{ return height; }
+		template<size_t Index>	constexpr const	T& get_element()	const;
+		template<>				constexpr const	T& get_element<0>()	const	{ return width; }
+		template<>				constexpr const T& get_element<1>()	const	{ return height; }
 
-		static constexpr size_t size() { return S; }
+		static constexpr size_t size() { return 2; }
 
 				T* begin()				{ return &width; }
 		const	T* begin()		const	{ return &width; }
@@ -88,8 +92,8 @@ namespace rv
 		const	T* rend()		const	{ return &begin - 1; }
 		const	T* crend()		const	{ return &begin - 1; }
 
-				T* data()		{ return &width }
-		const	T* data() const	{ return &width }
+				T* data()		{ return &width; }
+		const	T* data() const	{ return &width; }
 
 		T width;
 		T height;

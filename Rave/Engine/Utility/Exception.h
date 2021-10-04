@@ -1,27 +1,37 @@
 #pragma once
 #include "Engine/Utility/Result.h"
-#include <exception>
+#include <stdexcept>
 
 namespace rv
 {
+	struct ErrorInfo : public ResultInfo
+	{
+		ErrorInfo() = default;
+		ErrorInfo(const char* filename, u64 line);
+
+		const char* filename = nullptr;
+		u64 line = 0;
+	};
+
 	struct ResultException : public std::exception
 	{
 	public:
 		ResultException() = default;
-		ResultException(const ResultInfo& info, const char* file, const u64 line, const std::string& message = {});
-		ResultException(const ResultInfo& info, const std::string& message = {});
-		ResultException(const std::shared_ptr<ResultInfo>& info, const char* file, const u64 line, const std::string& message = {});
-		ResultException(const std::shared_ptr<ResultInfo>& info, const std::string& message = {});
+		ResultException(const Result& result, const std::string & message = {});
+		ResultException(const Result& result, const char* filename, u64 line, const std::string& message = {});
 
 		const char* what() const override;
+		const char* get_filename() const;
+		u64 get_line() const;
+		const Result& get_result() const;
 
 	private:
-		void format(const ResultInfo& info, const std::string& message = {});
+		void format(const std::string& message = {});
 
 		std::string m_what;
 		const char* filename = nullptr;
-		const u64 line = 0;
-		std::shared_ptr<ResultInfo> pInfo;
+		u64 line = 0;
+		Result result;
 	};
 }
 

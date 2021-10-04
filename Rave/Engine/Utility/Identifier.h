@@ -10,6 +10,8 @@ namespace rv
 		constexpr Identifier() : m_name(nullptr), m_hash(std::numeric_limits<size_t>::max()) {}
 		constexpr Identifier(const char* name) : m_name(name), m_hash(rv::hash(name)) {}
 		
+		constexpr operator size_t () const { return hash(); }
+
 		constexpr size_t hash() const { return m_hash; };
 		constexpr const char* name() const { return m_name; }
 

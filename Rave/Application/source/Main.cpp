@@ -1,24 +1,19 @@
 #include <iostream>
 #include <functional>
+#include <thread>
+#include <thread>
 #include "Engine/Engine.h"
 
-static constexpr int foo()
+using namespace std::chrono_literals;
+
+rv::Result rave_main()
 {
-	rv::Vector<2, int> vec1 = rv::Vector<2, int>(2, 3);
-	rv::Vector<2, int> vec2 = rv::Vector<2, int>(3, 7);
+	rv::Window window{};
+	rv::Window::Create(window, "Hello world!", 600, 400).expect("Unable to create window");
 
-	vec1 += vec2.array[0];
+	while (window.HandleMessages())
+	{
+	}
 
-	return (vec1 + vec2.array[0]).array[1];
-}
-
-struct A
-{
-	static constexpr int i = foo();
-};
-
-rv::Result<void> rave_main()
-{
-	int i = A::i;
-	return rv_success;
+	return rv::success;
 }

@@ -2,59 +2,86 @@
 #include "Engine/Utility/String.h"
 #include "Engine/Utility/Error.h"
 
-rv::ResultException::ResultException(const ResultInfo& info, const char* file, const u64 line, const std::string& message)
-	:
-	filename(file),
-	line(line)
+namespace rv
 {
-	format(info, message);
-}
+	ErrorInfo::ErrorInfo(const char* filename, u64 line)
+		:
+		filename(filename),
+		line(line)
+	{
+	}
 
-rv::ResultException::ResultException(const ResultInfo& info, const std::string& message)
-{
-	format(info, message);
-}
+	ResultException::ResultException(const Result& res, const std::string& message)
+		:
+		result(res)
+	{
+		const ResultInfo* info = res.info();
+		if (info)
+		{
+			const ErrorInfo* e = dynamic_cast<const ErrorInfo*>(info);
+			if (e)
+			{
+				line = e->line;
+				filename = e->filename;
+			}
+		}
+		format(message);
+	}
 
-rv::ResultException::ResultException(const std::shared_ptr<ResultInfo>& info, const char* file, const u64 line, const std::string& message)
-	:
-	filename(file),
-	line(line),
-	pInfo(info)
-{
-	rv_assert_msg(info.get(), "A valid std::shared_ptr<ResultInfo> must be passed to ResultException");
-	format(*info, message);
-}
+	ResultException::ResultException(const Result& res, const char* filename, u64 line, const std::string& message)
+		:
+		result(res),
+		filename(filename),
+		line(line)
+	{
+		format(message);
+	}
 
-rv::ResultException::ResultException(const std::shared_ptr<ResultInfo>& info, const std::string& message)
-	:
-	pInfo(info)
-{
-	rv_assert_msg(info.get(), "A valid std::shared_ptr<ResultInfo> must be passed to ResultException");
-	format(*info, message);
-}
+	const char* ResultException::what() const
+	{
+		return m_what.c_str();
+	}
 
-const char* rv::ResultException::what() const
-{
-	return m_what.c_str();
-}
+	const char* ResultException::get_filename() const
+	{
+		return filename;
+	}
 
-void rv::ResultException::format(const ResultInfo& info, const std::string& message)
-{
-	std::stringstream ss;
-	ss << "Exception of type \"" << info.type.name() << "\" occurred!\n" << std::endl;
+	u64 ResultException::get_line() const
+	{
+		return line;
+	}
 
-	if (filename)
-		ss << "File: " << filename << '\n'
-		   << "Line: " << line << '\n' << '\n';
+	const Result& ResultException::get_result() const
+	{
+		return result;
+	}
 
-	std::string opt_info = info.optional_info();
-	if (opt_info.size() != 0)
-		ss << opt_info << '\n' << std::endl;
+	void ResultException::format(const std::string& message)
+	{
+		std::stringstream ss;
+		ss << "Exception of type \"" << result.type().name() << "\" occurred!\n" << std::endl;
+		ss << "Severity: " << result.severity() << std::endl;
 
-	ss << "Description: " << info.description();
+		if (filename)
+			ss << "File: " << filename << '\n'
+			<< "Line: " << line << '\n' << '\n';
 
-	if (message.size() != 0)
-		ss << '\n' << std::endl << "Message: " << message;
+		const ResultInfo* info = result.info();
+		if (info)
+		{
+			std::string opt_info = info->optional_info();
+			if (opt_info.size() != 0)
+				ss << opt_info << '\n' << std::endl;
 
-	m_what = ss.str();
+			ss << "Description: " << info->description();
+
+			bool msg = message.size() != 0;
+
+			if (msg)
+				ss << '\n' << std::endl << "Message: " << message;
+		}
+
+		m_what = ss.str();
+	}
 }

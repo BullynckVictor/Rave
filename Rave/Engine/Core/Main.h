@@ -1,4 +1,4 @@
 #pragma once
 #include "Engine/Utility/Result.h"
 
-rv::Result<void> rave_main();
+rv::Result rave_main();
