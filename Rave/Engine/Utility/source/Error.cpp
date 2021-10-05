@@ -9,6 +9,52 @@ namespace rv
 {
 	Result failed = Result(RV_SEVERITY_ERROR, unknown_error);
 
+	InfoError::InfoError(const std::string& info)
+		:
+		ErrorInfo(),
+		info(info)
+	{
+	}
+	InfoError::InfoError(std::string&& info)
+		:
+		ErrorInfo(),
+		info(std::move(info))
+	{
+	}
+	InfoError::InfoError(const std::string& info, const char* source, u64 line)
+		:
+		ErrorInfo(source, line),
+		info(info)
+	{
+	}
+	InfoError::InfoError(std::string&& info, const char* source, u64 line)
+		:
+		ErrorInfo(source, line),
+		info(std::move(info))
+	{
+	}
+
+	std::string InfoError::description() const
+	{
+		return info;
+	}
+
+	InfoResult::InfoResult(const std::string& info)
+		:
+		info(info)
+	{
+	}
+	InfoResult::InfoResult(std::string&& info)
+		:
+		info(std::move(info))
+	{
+	}
+
+	std::string InfoResult::description() const
+	{
+		return info;
+	}
+
 	FailedAssertionError::FailedAssertionError(const char* expression)
 		:
 		ErrorInfo(),
@@ -21,6 +67,47 @@ namespace rv
 		ErrorInfo(source, line),
 		expression(expression)
 	{
+	}
+
+	Result info(const std::string& info, const Severity& severity)
+	{
+		ResultInfo* result = nullptr;
+		if (severity == RV_SEVERITY_ERROR)
+			result = new InfoError(info);
+		else
+			result = new InfoResult(info);
+
+		return Result(severity, info_id, result);
+	}
+	Result info(std::string&& info, const Severity& severity)
+	{
+		ResultInfo* result = nullptr;
+		if (severity == RV_SEVERITY_ERROR)
+			result = new InfoError(std::move(info));
+		else
+			result = new InfoResult(std::move(info));
+
+		return Result(severity, info_id, result);
+	}
+	Result info(const std::string& info, const Severity& severity, const char* source, u64 line)
+	{
+		ResultInfo* result = nullptr;
+		if (severity == RV_SEVERITY_ERROR)
+			result = new InfoError(info, source, line);
+		else
+			result = new InfoResult(info);
+
+		return Result(severity, info_id, result);
+	}
+	Result info(std::string&& info, const Severity& severity, const char* source, u64 line)
+	{
+		ResultInfo* result = nullptr;
+		if (severity == RV_SEVERITY_ERROR)
+			result = new InfoError(std::move(info), source, line);
+		else
+			result = new InfoResult(std::move(info));
+
+		return Result(severity, info_id, result);
 	}
 
 	std::string FailedAssertionError::description() const

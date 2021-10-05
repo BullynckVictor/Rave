@@ -7,12 +7,40 @@
 namespace rv
 {
 	static constexpr Identifier assertion_id	= "Assertion";
+	static constexpr Identifier info_id			= "Info";
 	static constexpr Identifier file_result_id	= "File Result";
 	static constexpr Identifier unknown_error	= "Unknown Error";
 	static constexpr Identifier ptr_result_id	= "Pointer Result";
 	rv_only_windows(
 	static constexpr Identifier hr_result_id	= "HRESULT";
 	)
+
+	struct InfoError : public ErrorInfo
+	{
+		InfoError() {}
+		InfoError(const std::string& info);
+		InfoError(std::string&& info);
+		InfoError(const std::string& info, const char* source, u64 line);
+		InfoError(std::string&& info, const char* source, u64 line);
+		std::string description() const override;
+
+		std::string info;
+	};
+
+	struct InfoResult : public ResultInfo
+	{
+		InfoResult() {}
+		InfoResult(const std::string& info);
+		InfoResult(std::string&& info);
+		std::string description() const override;
+
+		std::string info;
+	};
+
+	Result info(const std::string& info, const Severity& severity = RV_SEVERITY_INFO);
+	Result info(std::string&& info, const Severity& severity = RV_SEVERITY_INFO);
+	Result info(const std::string& info, const Severity& severity, const char* source, u64 line);
+	Result info(std::string&& info, const Severity& severity, const char* source, u64 line);
 
 	struct FailedAssertionError : public ErrorInfo
 	{
@@ -158,3 +186,7 @@ namespace rv
 //returns last hr error on fail
 #define rvrlrof(cond)					rv_return_failed(rv_last_result_onfail(cond))
 #endif
+
+#define rv_info(msg)					rv::info(msg, rv::RV_SEVERITY_INFO)
+#define rv_warning(msg)					rv::info(msg, rv::RV_SEVERITY_WARNING)
+#define rv_error(msg)					rv::info(msg, rv::RV_SEVERITY_ERROR, RV_FILE_LINE)

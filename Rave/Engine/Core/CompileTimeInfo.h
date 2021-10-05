@@ -2,8 +2,12 @@
 
 #ifndef NDEBUG
 #	define RV_DEBUG
+#	define rv_only_debug(code)		code
+#	define rv_only_release(code)	
 #else
 #	define RV_RELEASE
+#	define rv_only_debug(code)		
+#	define rv_only_release(code)	code
 #endif
 
 #ifdef _WIN32
@@ -36,6 +40,7 @@
 #endif
 
 #ifdef RV_RENDERER_D3D11
+#	define rv_only_d3d11(code)		code
 #endif
 
 #ifdef RV_TARGET_32
@@ -106,5 +111,12 @@ namespace rv
 			static constexpr int bit = 64;
 #		endif
 		} target;
+
+		struct Renderer
+		{
+#		ifdef RV_RENDERER_D3D11
+			static constexpr bool d3d11 = true;
+#		endif
+		} renderer;
 	} cti;
 }

@@ -37,7 +37,7 @@ namespace rv
 
 		void throw_exception(const std::string& message = {}) const;
 
-	private:
+	protected:
 		Identifier m_type;
 		Severity m_severity;
 		std::shared_ptr<ResultInfo> m_info;
@@ -52,7 +52,26 @@ namespace rv
 	public:
 		ResultValue(const T& v = {}) : Result(success), m_value(v) {}
 		ResultValue(T&& v) : Result(success), m_value(std::move(v)) {}
-		ResultValue(const Result& result) : Result(result) {}
+		ResultValue(const ResultValue& rhs) : Result(rhs), m_value(rhs.m_value) {}
+		ResultValue(ResultValue&& rhs) : Result(rhs), m_value(std::move(rhs.m_value)) {}
+		ResultValue(const Result& result) : Result(result), m_value() {}
+
+		ResultValue& operator= (const ResultValue& rhs) 
+		{ 
+			m_type = rhs.m_type; 
+			m_severity = rhs.m_severity; 
+			m_info = rhs.m_info; 
+			m_value = rhs.m_value; 
+			return *this; 
+		}
+		ResultValue& operator= (ResultValue&& rhs)
+		{
+			m_type = std::move(rhs.m_type);
+			m_severity = std::move(rhs.m_severity);
+			m_info = std::move(rhs.m_info);
+			m_value = std::move(rhs.m_value);
+			return *this;
+		}
 
 		T& value() { return m_value; }
 		T& get(const Flags<Severity>& sev = RV_SEVERITY_INFO) { expect(sev); return value(); }

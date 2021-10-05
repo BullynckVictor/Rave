@@ -22,7 +22,7 @@ namespace rv
 			ATOM atom{};
 		};
 
-		struct WindowInfo
+		struct WindowCreateInfo
 		{
 			std::string title;
 			Extent<uint> size = 0;
@@ -34,18 +34,20 @@ namespace rv
 			~Window();
 
 			static Result Create(Window& window, const std::string& title, uint width, uint height);
-			static Result Create(Window& window, const WindowInfo& info);
+			static Result Create(Window& window, const WindowCreateInfo& info);
 
-			Extent<uint> Size() const;
+			const Extent<uint>& Size() const;
 
 			const std::string& Title() const;
-			void SetTitle(const std::string& title);
-			void SetTitle(std::string&& title);
+			Result SetTitle(const std::string& title);
+			Result SetTitle(std::string&& title);
 
 			bool Open();
 			Result Close();
 
 			bool HandleMessages();
+
+			HWND Handle() const;
 
 		private:
 			static Result CreateWindowClass();
@@ -56,11 +58,11 @@ namespace rv
 
 		private:
 			static WindowClass wClass;
-			WindowInfo data;
+			WindowCreateInfo data;
 			HWND hwnd;
 		};
 	}
 
-	typedef win32::WindowInfo WindowInfo;
+	typedef win32::WindowCreateInfo WindowCreateInfo;
 	typedef win32::Window Window;
 }

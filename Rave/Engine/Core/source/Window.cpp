@@ -40,13 +40,13 @@ namespace rv
 
 		Result Window::Create(Window& window, const std::string& title, uint width, uint height)
 		{
-			WindowInfo info{};
+			WindowCreateInfo info{};
 			info.title = title;
 			info.size = { width, height };
 			return Window::Create(window, info);
 		}
 
-		Result Window::Create(Window& window, const WindowInfo& info)
+		Result Window::Create(Window& window, const WindowCreateInfo& info)
 		{
 			rv_result;
 
@@ -78,7 +78,7 @@ namespace rv
 			return result;
 		}
 
-		Extent<uint> Window::Size() const
+		const Extent<uint>& Window::Size() const
 		{
 			return data.size;
 		}
@@ -88,16 +88,16 @@ namespace rv
 			return data.title;
 		}
 
-		void Window::SetTitle(const std::string& title)
+		Result Window::SetTitle(const std::string& title)
 		{
 			data.title = title;
-			SetWindowText(hwnd, title.c_str());
+			return rv_last_result_onfail(SetWindowText(hwnd, title.c_str()));
 		}
 
-		void Window::SetTitle(std::string&& title)
+		Result Window::SetTitle(std::string&& title)
 		{
 			data.title = std::move(title);
-			SetWindowText(hwnd, title.c_str());
+			return rv_last_result_onfail(SetWindowText(hwnd, title.c_str()));
 		}
 
 		bool Window::Open()
@@ -120,6 +120,11 @@ namespace rv
 			}
 			return Open();
 		}
+
+        HWND Window::Handle() const
+        {
+            return hwnd;
+        }
 
 		Result Window::CreateWindowClass()
 		{
